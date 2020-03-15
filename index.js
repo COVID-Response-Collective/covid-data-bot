@@ -70,7 +70,10 @@ bot.on('messageCreate', async (msg) => { // When a message is created
       ? deaths[confirmed.length - 1][1]
       : 0;
 
-    bot.createMessage(msg.channel.id, `As of the latest data from Johns Hopkins University:\n\nThe current number of cases in ${!Array.isArray(state) ? 'Oregon' : state[1]} is ${confirmedNo}.\nThe number of recovered cases is ${recoveriesNo}.\nThe number of deaths is ${deathsNo}.`);
+    bot.createMessage(msg.channel.id, 'As of the latest data from Johns Hopkins University:');
+    bot.createMessage(msg.channel.id, `The current number of cases in ${!Array.isArray(state) ? 'Oregon' : titleCase(state[1])} is ${confirmedNo}.`);
+    bot.createMessage(msg.channel.id, `The number of recovered cases is ${recoveriesNo}.`);
+    bot.createMessage(msg.channel.id, `The number of deaths is ${deathsNo}.`);
   }
 });
 
