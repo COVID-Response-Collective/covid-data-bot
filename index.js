@@ -16,12 +16,13 @@ function sortFn(a, b) {
 }
 
 async function getCovidData(state) {
-  const data = await axios.get('https://covid-data-scraper.herokuapp.com/');
+  const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
+  const properState = state[0].toUpperCase() + state.substring(1);
 
-  const washingtonData = data.US[state];
+  const stateData = data.US[properState];
   const {
     provincestate, countryregion, lat, long, headers, ...datesObj
-  } = washingtonData;
+  } = stateData;
 
   const datesArray = Object.keys(datesObj)
     .reduce((acc, dateKey) => [...acc, [dateKey, datesObj[dateKey]]], []);
@@ -40,16 +41,23 @@ bot.on('ready', () => { // When the bot is ready
   console.log('Ready!'); // Log "Ready!"
 });
 
-bot.on('messageCreate', (msg) => { // When a message is created
-  if (msg.content.startsWith('!getData')) { // If the message content is "!ping"
-    const state = msg.content.match(/!getData(.*)/)[0];
-    const data = getCovidData(state === '' ? 'Oregon' : state);
+bot.on('messageCreate', async (msg) => { // When a message is created
+  if (msg.content.toLowerCase().startsWith('!getdata')) { // If the message content is "!ping"
+    const state = msg.content.toLowerCase().match(/!getdata (.*)/);
+    const data = await getCovidData(!Array.isArray(state) ? 'Oregon' : state[1]);
     const { confirmed, recoveries, deaths } = data;
-    const confirmedNo = confirmed[-1][1];
-    const recoveriesNo = recoveries[-1][1];
-    const deathsNo = deaths[-1][1];
 
-    bot.createMessage(msg.channel.id, `As of our latest data:\nThe current number of cases in ${state} is ${confirmedNo}.\nThe number of folks who have recovered is ${recoveriesNo}.\nThe number of deaths is ${deathsNo}.`);
+    const confirmedNo = Array.isArray(confirmed) && confirmed[confirmed.length - 1]
+      ? confirmed[confirmed.length - 1][1]
+      : 0;
+    const recoveriesNo = Array.isArray(recoveries) && recoveries[confirmed.length - 1]
+      ? recoveries[confirmed.length - 1][1]
+      : 0;
+    const deathsNo = Array.isArray(deaths) && deaths[confirmed.length - 1]
+      ? deaths[confirmed.length - 1][1]
+      : 0;
+
+    bot.createMessage(msg.channel.id, `As of the latest data from Johns Hopkins University:\n\nThe current number of cases in ${!Array.isArray(state) ? 'Oregon' : state[1]} is ${confirmedNo}.\nThe number of recovered cases is ${recoveriesNo}.\nThe number of deaths is ${deathsNo}.`);
   }
 });
 
