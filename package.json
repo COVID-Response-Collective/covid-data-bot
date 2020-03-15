@@ -1,0 +1,14 @@
+{
+  "name": "covid-data-bot",
+  "version": "0.0.1",
+  "description": "Discord bot that speaks out COVID-19 data provided by Johns Hopkins University.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Meredith Mello",
+  "license": "MIT",
+  "dependencies": {
+    "eris": "^0.11.2"
+  }
+}
