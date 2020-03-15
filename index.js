@@ -15,9 +15,22 @@ function sortFn(a, b) {
   return 0;
 }
 
+// from https://stackoverflow.com/a/32589289
+function titleCase(str) {
+  const splitStr = str.toLowerCase().split(' ');
+  for (let i = 0; i < splitStr.length; i += 1) {
+    // You do not need to check if i is larger than splitStr length, as your for does that for you
+    // Assign it back to the array
+    splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+  }
+  // Directly return the joined string
+  return splitStr.join(' ');
+}
+
 async function getCovidData(state) {
   const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
-  const properState = state[0].toUpperCase() + state.substring(1);
+  const lowercaseState = state.toLowerCase();
+  const properState = titleCase(lowercaseState);
 
   const stateData = data.US[properState];
   const {
