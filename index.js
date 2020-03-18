@@ -59,7 +59,7 @@ async function getCovidData(channelId, query) {
     const latestDeaths = getLatestData(deathsData);
 
     const messageText = `As of the ${latestConfirmed.date}, from Johns Hopkins University:\n\n`
-                      + `The current number of cases in ${stateTitleCase} is ${latestConfirmed.number}.\n`
+                      + `The current number of confirmed cases in ${stateTitleCase} is ${latestConfirmed.number}.\n`
                       + `The number of recovered cases is ${latestRecoveries.number}.\n`
                       + `The number of deaths is ${latestDeaths.number}.`;
 
