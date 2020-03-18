@@ -1,7 +1,6 @@
 const Eris = require('eris');
 const axios = require('axios');
 const v = require('voca');
-const isArray = require('lodash/isArray');
 const isEmpty = require('lodash/isEmpty');
 const join = require('lodash/join');
 
@@ -9,20 +8,6 @@ const COMMAND = {
   HELP: 'help',
   DATA: 'data',
 };
-
-function sortFn(a, b) {
-  const nameA = a[0].toUpperCase(); // ignore upper and lowercase
-  const nameB = b[0].toUpperCase(); // ignore upper and lowercase
-  if (nameA < nameB) {
-    return -1;
-  }
-  if (nameA > nameB) {
-    return 1;
-  }
-
-  // names must be equal
-  return 0;
-}
 
 const bot = new Eris('Njg4NjAzNDQzNTA5OTg1Mjk3.Xm2v6g.RxftGTkR3lPFekzEmsUEh8GgxzY');
 // Replace BOT_TOKEN with your bot account's token
@@ -68,8 +53,6 @@ async function getCovidData(channelId, query) {
     const {
       confirmedData, recoveriesData, deathsData,
     } = stateData;
-
-    console.log(stateData);
 
     const latestConfirmed = getLatestData(confirmedData);
     const latestRecoveries = getLatestData(recoveriesData);
