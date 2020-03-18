@@ -46,6 +46,16 @@ function getUnknown(channelId) {
   bot.createMessage(channelId, 'Unknown command or command missing. Type `!bot help` for a list of commands.');
 }
 
+function getLatestData(caseData) {
+  if (isEmpty(caseData)) {
+    return { date: 'N/A', number: 0 };
+  }
+  const sortedDates = Object.keys(caseData).sort();
+  const latestDate = sortedDates[sortedDates.length - 1];
+
+  return { date: latestDate, number: caseData[latestDate] };
+}
+
 async function getCovidData(channelId, query) {
   const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
 
@@ -56,30 +66,19 @@ async function getCovidData(channelId, query) {
   try {
     const stateData = data.US[stateTitleCase];
     const {
-      provincestate, countryregion, lat, long, headers, ...datesObj
+      confirmedData, recoveriesData, deathsData,
     } = stateData;
 
-    const datesArray = Object.keys(datesObj)
-      .reduce((acc, dateKey) => [...acc, [dateKey, datesObj[dateKey]]], []);
+    console.log(stateData);
 
-    const recoveries = datesArray.filter((date) => date[0].startsWith('recoveries_')).sort(sortFn);
-    const deaths = datesArray.filter((date) => date[0].startsWith('deaths_')).sort(sortFn);
-    const confirmed = datesArray.filter((date) => !date[0].startsWith('recoveries_') && !date[0].startsWith('deaths_')).sort(sortFn);
+    const latestConfirmed = getLatestData(confirmedData);
+    const latestRecoveries = getLatestData(recoveriesData);
+    const latestDeaths = getLatestData(deathsData);
 
-    const confirmedNo = isArray(confirmed) && confirmed[confirmed.length - 1]
-      ? confirmed[confirmed.length - 1][1]
-      : 0;
-    const recoveriesNo = isArray(recoveries) && recoveries[confirmed.length - 1]
-      ? recoveries[confirmed.length - 1][1]
-      : 0;
-    const deathsNo = isArray(deaths) && deaths[confirmed.length - 1]
-      ? deaths[confirmed.length - 1][1]
-      : 0;
-
-    const messageText = 'As of the latest data from Johns Hopkins University:\n\n'
-                      + `The current number of cases in ${stateTitleCase} is ${confirmedNo}.\n`
-                      + `The number of recovered cases is ${recoveriesNo}.\n`
-                      + `The number of deaths is ${deathsNo}.`;
+    const messageText = `As of the ${latestConfirmed.date}, from Johns Hopkins University:\n\n`
+                      + `The current number of cases in ${stateTitleCase} is ${latestConfirmed.number}.\n`
+                      + `The number of recovered cases is ${latestRecoveries.number}.\n`
+                      + `The number of deaths is ${latestDeaths.number}.`;
 
     bot.createMessage(channelId, messageText);
   } catch (error) {
