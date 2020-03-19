@@ -7,17 +7,19 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Meredith Mello",
+  "author": "Omeed Habibelahian",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.19.2",
     "eris": "^0.11.2",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "voca": "^1.4.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1"
+    "eslint-plugin-import": "^2.20.1",
+    "nodemon": "^2.0.2"
   }
 }
