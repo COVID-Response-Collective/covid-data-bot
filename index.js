@@ -21,10 +21,14 @@ function getHelp(channelId) {
                     + '`!cbot {command} {your query}`\n\n'
                     + 'Commands:\n\n'
                     + '1. `!cbot show {country}`\n'
-                    + '     Gets latest case numbers for the specified state. Chooses worldwide numbers if no country is specified.\n\n'
+                    + '     Gets latest case numbers for the specified country. Displays worldwide numbers if no country is specified.\n\n'
                     + '     Example:\n'
                     + '     `!cbot show usa`\n\n'
-                    + '2. `!cbot help`\n'
+                    + '2. `!cbot show [us/usa] {state}`\n'
+                    + '     Gets latest case numbers for the specified US state. Displays US nationwide numbers if no state is specified.\n\n'
+                    + '     Example:\n'
+                    + '     `!cbot show us oregon`\n\n'
+                    + '3. `!cbot help`\n'
                     + '     Prints this help message.\n\n'
                     + 'Stay healthy! This bot loves you very much.';
 
