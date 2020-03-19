@@ -96,12 +96,14 @@ async function getCovidData(channelId, query) {
       bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(query[0])}.`);
     }
   }
-  else if (query[0] == 'us') {
-    const state = v.titleCase(query[1]);
+  else if (query[0] == 'us' || query[0] == 'usa') {
+    console.log(query);
+    const state = v.titleCase(query.slice(1,query.length).join(' '));
+    console.log(state);
     const { data } = await axios.get('https://corona.lmao.ninja/states/');
     try {
       var stateData = data.find(function(e) {
-        return v.lowerCase(e.state) == v.lowerCase(query[1]);
+        return v.lowerCase(e.state) == v.lowerCase(state);
       });
       var cases = (stateData.cases).toLocaleString('en');
       var todayCases = (stateData.todayCases).toLocaleString('en');
@@ -121,7 +123,7 @@ async function getCovidData(channelId, query) {
       bot.createMessage(channelId, message);
     }
     catch(error) {
-      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(query[0])}.`);
+      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(state)}.`);
     }
   }
   /*const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
