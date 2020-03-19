@@ -1,10 +1,9 @@
-const Eris = require('eris');
-const axios = require('axios');
-const v = require('voca');
-const isEmpty = require('lodash/isEmpty');
-const join = require('lodash/join');
-const moment = require('moment');
-const { token } = require('./config.json');
+import Eris from 'eris';
+import axios from 'axios';
+import v from 'voca';
+import { isEmpty, join, pick } from 'lodash';
+import moment from 'moment';
+import { token } from './config.json';
 
 const COMMAND = {
   HELP: 'help',
@@ -50,71 +49,92 @@ function getLatestData(caseData) {
 }
 
 async function getCovidData(channelId, query) {
-  console.log(query);
-  query = isEmpty(query) ? ['all'] : (Array.isArray(query) ? query : [query]);
-  if (query[0] == 'all') {
+  let queryArray;
+
+  if (isEmpty(query)) {
+    queryArray = ['all'];
+  } else if (Array.isArray(query)) {
+    queryArray = query;
+  }
+
+  if (queryArray[0] === 'all') {
     const { data } = await axios.get('https://corona.lmao.ninja/all');
     try {
-      var cases = (data.cases).toLocaleString('en');
-      var deaths = (data.deaths).toLocaleString('en');
-      var recovered = (data.recovered).toLocaleString('en');
-      var dateLastUpdated = moment(data.updated).format('MMMM D, YYYY [at] h:mm a');
+      console.log(data);
+      const { cases, deaths, recovered, updated } = pick(data, ['cases', 'deaths', 'recovered', 'updated']);
+      const active = cases - deaths - recovered;
+      const dateLastUpdated = moment(data.updated).format('MMMM D, YYYY [at] h:mm a');
       const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
-        + `Total Cases: ${cases}\n`
-        + `Deaths: ${deaths}\n`
-        + `Recovered: ${recovered}\n`
-        + `Active Cases: ${cases - deaths - recovered}`;
+        + `Total Cases: ${cases.toLocaleString('en')}\n`
+        + `Deaths: ${deaths.toLocaleString('en')}\n`
+        + `Recovered: ${recovered.toLocaleString('en')}\n`
+        + `Active Cases: ${active.toLocaleString('en')}`;
 
       bot.createMessage(channelId, message);
     } catch(error) {
+      console.log(error);
       bot.createMessage(channelId, 'My apologies. I wasn\'t able to get the worldwide numbers.');
     }
   }
-  else if (query.length == 1) {
-    const { data } = await axios.get(`https://corona.lmao.ninja/countries/${v.lowerCase(query[0])}`);
+  else if (queryArray.length == 1) {
+    const { data } = await axios.get(`https://corona.lmao.ninja/countries/${v.lowerCase(queryArray[0])}`);
     try {
+      console.log(data);
       if (data == 'Country not found') {
-        throw new Exception(data);
+        throw new Error(error);
       }
-      var country = query[0] == 'us' || query[0] == 'usa' ? 'the United States' : (query[0] == 'uk' ? 'the United Kingdom' : v.upperCase(query[0]));
-      var cases = (data.cases).toLocaleString('en');
+      //var country = query[0] == 'us' || query[0] == 'usa' ? 'the United States' : (query[0] == 'uk' ? 'the United Kingdom' : v.upperCase(query[0]));
+      let country;
+      if (v.lowerCase(queryArray[0]) === 'us' || v.lowerCase(queryArray[0]) == 'usa') {
+        country = 'the United States';
+      } else if (v.lowerCase(queryArray[0]) === 'uk') {
+        country = 'the United Kingdom';
+      } else {
+        country = v.titleCase(queryArray[0]);
+      }
+      /*var cases = (data.cases).toLocaleString('en');
       var todayCases = (data.todayCases).toLocaleString('en');
       var deaths = (data.deaths).toLocaleString('en');
       var todayDeaths = (data.todayDeaths).toLocaleString('en');
       var recovered = (data.recovered).toLocaleString('en');
       var active = (data.active).toLocaleString('en');
       var critical = (data.critical).toLocaleString('en');
-      var casesPer1M = (data.casesPerOneMillion).toLocaleString('en');
+      var casesPer1M = (data.casesPerOneMillion).toLocaleString('en');*/
+      const { cases, todayCases, deaths, todayDeaths, recovered, active, critical, casesPerOneMillion } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion']);
       const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
-        + `Total Cases: ${cases}\n`
-        + `Deaths: ${deaths}\n`
-        + `Critical Condition: ${critical}\n`
-        + `Recovered: ${recovered}\n`
-        + `Active Cases: ${active}\n`
-        + `Cases Per Million: ${casesPer1M}\n\n`
-        + `New Cases Today: ${todayCases}\n`
-        + `New Deaths Today: ${todayDeaths}`;
+        + `Total Cases: ${cases.toLocaleString('en')}\n`
+        + `Deaths: ${deaths.toLocaleString('en')}\n`
+        + `Critical Condition: ${critical.toLocaleString('en')}\n`
+        + `Recovered: ${recovered.toLocaleString('en')}\n`
+        + `Active Cases: ${active.toLocaleString('en')}\n`
+        + `Cases Per Million: ${casesPerOneMillion.toLocaleString('en')}\n\n`
+        + `New Cases Today: ${todayCases.toLocaleString('en')}\n`
+        + `New Deaths Today: ${todayDeaths.toLocaleString('en')}`;
 
       bot.createMessage(channelId, message);
     } catch(error) {
-      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(query[0])}.`);
+      console.log(error);
+      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(queryArray[0])}.`);
     }
   }
-  else if (query[0] == 'us' || query[0] == 'usa') {
-    console.log(query);
-    const state = v.titleCase(query.slice(1,query.length).join(' '));
-    console.log(state);
+  else if (queryArray[0] == 'us' || queryArray[0] == 'usa') {
+    const state = v.titleCase(join(queryArray.slice(1,query.length), ' '));
     const { data } = await axios.get('https://corona.lmao.ninja/states/');
     try {
-      var stateData = data.find(function(e) {
+      const stateData = data.find(function(e) {
         return v.lowerCase(e.state) == v.lowerCase(state);
       });
-      var cases = (stateData.cases).toLocaleString('en');
+      console.log(stateData);
+      if (stateData === undefined) {
+        throw new Error(error)
+      }
+      /*var cases = (stateData.cases).toLocaleString('en');
       var todayCases = (stateData.todayCases).toLocaleString('en');
       var deaths = (stateData.deaths).toLocaleString('en');
       var todayDeaths = (stateData.todayDeaths).toLocaleString('en');
       var recovered = (stateData.recovered).toLocaleString('en');
-      var active = (stateData.active).toLocaleString('en');
+      var active = (stateData.active).toLocaleString('en');*/
+      const { cases, todayCases, deaths, todayDeaths, recovered, active } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
 
       const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
         + `Total Cases: ${cases}\n`
@@ -127,7 +147,8 @@ async function getCovidData(channelId, query) {
       bot.createMessage(channelId, message);
     }
     catch(error) {
-      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(state)}.`);
+      console.log(error);
+      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(queryArray[1])}.`);
     }
   }
   /*const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
