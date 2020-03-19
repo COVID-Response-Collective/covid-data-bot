@@ -3,13 +3,14 @@ const axios = require('axios');
 const v = require('voca');
 const isEmpty = require('lodash/isEmpty');
 const join = require('lodash/join');
+const { token } = require('./config.json');
 
 const COMMAND = {
   HELP: 'help',
   DATA: 'data',
 };
 
-const bot = new Eris('Njg4NjAzNDQzNTA5OTg1Mjk3.Xm2v6g.RxftGTkR3lPFekzEmsUEh8GgxzY');
+const bot = new Eris(token);
 // Replace BOT_TOKEN with your bot account's token
 
 function getHelp(channelId) {
