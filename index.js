@@ -73,14 +73,14 @@ async function getCovidData(channelId, query) {
           throw new Exception(data);
         }
         var country = query == 'us' || query == 'usa' || query == 'uk' ? 'the '.concat(v.upperCase(query)) : v.titleCase(query);
-        var cases = data.cases;
-        var todayCases = data.todayCases;
-        var deaths = data.deaths;
-        var todayDeaths = data.todayDeaths;
-        var recovered = data.recovered;
-        var active = data.active;
-        var critical = data.critical;
-        var casesPer1M = data.casesPerOneMillion;
+        var cases = (data.cases).toLocaleString('en');
+        var todayCases = (data.todayCases).toLocaleString('en');
+        var deaths = (data.deaths).toLocaleString('en');
+        var todayDeaths = (data.todayDeaths).toLocaleString('en');
+        var recovered = (data.recovered).toLocaleString('en');
+        var active = (data.active).toLocaleString('en');
+        var critical = (data.critical).toLocaleString('en');
+        var casesPer1M = (data.casesPerOneMillion).toLocaleString('en');
         const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
           + `Total Cases: ${cases}\n`
           + `Deaths: ${deaths}\n`
