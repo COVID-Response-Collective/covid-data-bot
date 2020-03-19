@@ -50,9 +50,9 @@ async function getCovidData(channelId, query) {
   if (query == 'all') {
     const { data } = await axios.get('https://corona.lmao.ninja/all');
     try {
-      var cases = data.cases;
-      var deaths = data.deaths;
-      var recovered = data.recovered;
+      var cases = (data.cases).toLocaleString('en');
+      var deaths = (data.deaths).toLocaleString('en');
+      var recovered = (data.recovered).toLocaleString('en');
       var dateLastUpdated = moment(data.updated).format('MMMM D, YYYY [at] h:mm a');
       const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
         + `Total Cases: ${cases}\n`
@@ -69,6 +69,9 @@ async function getCovidData(channelId, query) {
 
     const { data } = await axios.get(`https://corona.lmao.ninja/countries/${query}`);
       try {
+        if (data == 'Country not found') {
+          throw new Exception(data);
+        }
         var country = query == 'us' || query == 'usa' || query == 'uk' ? 'the '.concat(v.upperCase(query)) : v.titleCase(query);
         var cases = data.cases;
         var todayCases = data.todayCases;
@@ -90,7 +93,7 @@ async function getCovidData(channelId, query) {
 
         bot.createMessage(channelId, message)
       } catch(error) {
-        bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${query}.`);
+        bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.upperCase(query)}.`);
       }
   }
   /*const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
