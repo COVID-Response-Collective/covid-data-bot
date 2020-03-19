@@ -46,8 +46,9 @@ function getLatestData(caseData) {
 }
 
 async function getCovidData(channelId, query) {
-  query = isEmpty(query) ? 'all' : query;
-  if (query == 'all') {
+  console.log(query);
+  query = isEmpty(query) ? ['all'] : (Array.isArray(query) ? query : [query]);
+  if (query[0] == 'all') {
     const { data } = await axios.get('https://corona.lmao.ninja/all');
     try {
       var cases = (data.cases).toLocaleString('en');
@@ -58,43 +59,70 @@ async function getCovidData(channelId, query) {
         + `Total Cases: ${cases}\n`
         + `Deaths: ${deaths}\n`
         + `Recovered: ${recovered}\n`
-        + `Active Cases: ${cases - deaths - recovered}`
+        + `Active Cases: ${cases - deaths - recovered}`;
 
-      bot.createMessage(channelId, message)
+      bot.createMessage(channelId, message);
     } catch(error) {
       bot.createMessage(channelId, 'My apologies. I wasn\'t able to get the worldwide numbers.');
     }
   }
-  else {
-
-    const { data } = await axios.get(`https://corona.lmao.ninja/countries/${query}`);
-      try {
-        if (data == 'Country not found') {
-          throw new Exception(data);
-        }
-        var country = query == 'us' || query == 'usa' || query == 'uk' ? 'the '.concat(v.upperCase(query)) : v.titleCase(query);
-        var cases = (data.cases).toLocaleString('en');
-        var todayCases = (data.todayCases).toLocaleString('en');
-        var deaths = (data.deaths).toLocaleString('en');
-        var todayDeaths = (data.todayDeaths).toLocaleString('en');
-        var recovered = (data.recovered).toLocaleString('en');
-        var active = (data.active).toLocaleString('en');
-        var critical = (data.critical).toLocaleString('en');
-        var casesPer1M = (data.casesPerOneMillion).toLocaleString('en');
-        const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
-          + `Total Cases: ${cases}\n`
-          + `Deaths: ${deaths}\n`
-          + `Critical Condition: ${critical}\n`
-          + `Recovered: ${recovered}\n`
-          + `Active Cases: ${active}\n`
-          + `Cases Per Million: ${casesPer1M}\n\n`
-          + `New Cases Today: ${todayCases}\n`
-          + `New Deaths Today: ${todayDeaths}`
-
-        bot.createMessage(channelId, message)
-      } catch(error) {
-        bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.upperCase(query)}.`);
+  else if (query.length == 1) {
+    const { data } = await axios.get(`https://corona.lmao.ninja/countries/${v.lowerCase(query[0])}`);
+    try {
+      if (data == 'Country not found') {
+        throw new Exception(data);
       }
+      var country = query[0] == 'us' || query[0] == 'usa' ? 'the United States' : (query[0] == 'uk' ? 'the United Kingdom' : v.upperCase(query[0]));
+      var cases = (data.cases).toLocaleString('en');
+      var todayCases = (data.todayCases).toLocaleString('en');
+      var deaths = (data.deaths).toLocaleString('en');
+      var todayDeaths = (data.todayDeaths).toLocaleString('en');
+      var recovered = (data.recovered).toLocaleString('en');
+      var active = (data.active).toLocaleString('en');
+      var critical = (data.critical).toLocaleString('en');
+      var casesPer1M = (data.casesPerOneMillion).toLocaleString('en');
+      const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
+        + `Total Cases: ${cases}\n`
+        + `Deaths: ${deaths}\n`
+        + `Critical Condition: ${critical}\n`
+        + `Recovered: ${recovered}\n`
+        + `Active Cases: ${active}\n`
+        + `Cases Per Million: ${casesPer1M}\n\n`
+        + `New Cases Today: ${todayCases}\n`
+        + `New Deaths Today: ${todayDeaths}`;
+
+      bot.createMessage(channelId, message);
+    } catch(error) {
+      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(query[0])}.`);
+    }
+  }
+  else if (query[0] == 'us') {
+    const state = v.titleCase(query[1]);
+    const { data } = await axios.get('https://corona.lmao.ninja/states/');
+    try {
+      var stateData = data.find(function(e) {
+        return v.lowerCase(e.state) == v.lowerCase(query[1]);
+      });
+      var cases = (stateData.cases).toLocaleString('en');
+      var todayCases = (stateData.todayCases).toLocaleString('en');
+      var deaths = (stateData.deaths).toLocaleString('en');
+      var todayDeaths = (stateData.todayDeaths).toLocaleString('en');
+      var recovered = (stateData.recovered).toLocaleString('en');
+      var active = (stateData.active).toLocaleString('en');
+
+      const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
+        + `Total Cases: ${cases}\n`
+        + `Deaths: ${deaths}\n`
+        + `Recovered: ${recovered}\n`
+        + `Active Cases: ${active}\n\n`
+        + `New Cases Today: ${todayCases}\n`
+        + `New Deaths Today: ${todayDeaths}`;
+
+      bot.createMessage(channelId, message);
+    }
+    catch(error) {
+      bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${v.titleCase(query[0])}.`);
+    }
   }
   /*const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
 
