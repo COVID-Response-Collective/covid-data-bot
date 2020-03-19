@@ -3,11 +3,10 @@ const axios = require('axios');
 const v = require('voca');
 const isEmpty = require('lodash/isEmpty');
 const join = require('lodash/join');
-const moment = require('moment');
 
 const COMMAND = {
   HELP: 'help',
-  SHOW: 'show',
+  DATA: 'data',
 };
 
 const { BOT_TOKEN } = process.env;
@@ -17,13 +16,13 @@ const bot = new Eris(BOT_TOKEN);
 
 function getHelp(channelId) {
   const helpMessage = 'How to speak to me:\n\n'
-                    + '`!cbot {command} {your query}`\n\n'
+                    + '`!bot {command} {your query}`\n\n'
                     + 'Commands:\n\n'
-                    + '1. `!cbot show {country}`\n'
-                    + '     Gets latest case numbers for the specified state. Chooses worldwide numbers if no country is specified.\n\n'
+                    + '1. `!bot data {US State}`\n'
+                    + '     Gets latest case numbers for the specified state. Chooses Oregon by default.\n\n'
                     + '     Example:\n'
-                    + '     `!cbot show usa`\n\n'
-                    + '2. `!cbot help`\n'
+                    + '     `!bot data florida`\n\n'
+                    + '2. `!bot help`\n'
                     + '     Prints this help message.\n\n'
                     + 'Stay healthy! This bot loves you very much.';
 
@@ -31,7 +30,7 @@ function getHelp(channelId) {
 }
 
 function getUnknown(channelId) {
-  bot.createMessage(channelId, 'Unknown command or command missing. Type `!cbot help` for a list of commands.');
+  bot.createMessage(channelId, 'Unknown command or command missing. Type `!bot help` for a list of commands.');
 }
 
 function getLatestData(caseData) {
@@ -45,54 +44,7 @@ function getLatestData(caseData) {
 }
 
 async function getCovidData(channelId, query) {
-  query = isEmpty(query) ? 'all' : query;
-  if (query == 'all') {
-    const { data } = await axios.get('https://corona.lmao.ninja/all');
-    try {
-      var cases = data.cases;
-      var deaths = data.deaths;
-      var recovered = data.recovered;
-      var dateLastUpdated = moment(data.updated).format('MMMM D, YYYY [at] h:mm a');
-      const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
-        + `Total Cases: ${cases}\n`
-        + `Deaths: ${deaths}\n`
-        + `Recovered: ${recovered}\n`
-        + `Active Cases: ${cases - deaths - recovered}`
-
-      bot.createMessage(channelId, message)
-    } catch(error) {
-      bot.createMessage(channelId, 'My apologies. I wasn\'t able to get the worldwide numbers.');
-    }
-  }
-  else {
-
-    const { data } = await axios.get(`https://corona.lmao.ninja/countries/${query}`);
-      try {
-        var country = query == 'us' || query == 'usa' || query == 'uk' ? 'the '.concat(v.upperCase(query)) : v.titleCase(query);
-        var cases = data.cases;
-        var todayCases = data.todayCases;
-        var deaths = data.deaths;
-        var todayDeaths = data.todayDeaths;
-        var recovered = data.recovered;
-        var active = data.active;
-        var critical = data.critical;
-        var casesPer1M = data.casesPerOneMillion;
-        const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
-          + `Total Cases: ${cases}\n`
-          + `Deaths: ${deaths}\n`
-          + `Critical Condition: ${critical}\n`
-          + `Recovered: ${recovered}\n`
-          + `Active Cases: ${active}\n`
-          + `Cases Per Million: ${casesPer1M}\n\n`
-          + `New Cases Today: ${todayCases}\n`
-          + `New Deaths Today: ${todayDeaths}`
-
-        bot.createMessage(channelId, message)
-      } catch(error) {
-        bot.createMessage(channelId, `My apologies. I wasn\'t able to get the numbers for ${query}.`);
-      }
-  }
-  /*const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
+  const { data } = await axios.get('https://covid-data-scraper.herokuapp.com/');
 
   const state = isEmpty(query) ? 'oregon' : join(query, ' ');
 
@@ -116,7 +68,7 @@ async function getCovidData(channelId, query) {
     bot.createMessage(channelId, messageText);
   } catch (error) {
     bot.createMessage(channelId, `My apologies. I can't find data for ${stateTitleCase}.`);
-  }*/
+  }
 }
 
 bot.on('ready', () => { // When the bot is ready
@@ -126,12 +78,12 @@ bot.on('ready', () => { // When the bot is ready
 bot.on('messageCreate', async (msg) => { // When a message is created
   const message = v.lowerCase(msg.content);
 
-  if (v.startsWith(message, '!cbot')) {
+  if (v.startsWith(message, '!bot')) {
     const messageWords = v.words(message).slice(1);
     const [command, ...query] = messageWords;
 
     switch (command) {
-      case COMMAND.SHOW:
+      case COMMAND.DATA:
         getCovidData(msg.channel.id, query);
         break;
       case COMMAND.HELP:
