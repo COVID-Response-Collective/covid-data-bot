@@ -3,7 +3,6 @@ const axios = require('axios');
 const v = require('voca');
 const isEmpty = require('lodash/isEmpty');
 const join = require('lodash/join');
-const { token } = require('./config.json');
 const moment = require('moment');
 
 const COMMAND = {
@@ -11,7 +10,9 @@ const COMMAND = {
   SHOW: 'show',
 };
 
-const bot = new Eris(token);
+const { BOT_TOKEN } = process.env;
+
+const bot = new Eris(BOT_TOKEN);
 // Replace BOT_TOKEN with your bot account's token
 
 function getHelp(channelId) {
