@@ -10,10 +10,7 @@ const COMMAND = {
   SHOW: 'show',
 };
 
-// const { BOT_TOKEN } = process.env.TOKEN;
-
 const bot = new Eris(token);
-// Replace BOT_TOKEN with your bot account's token
 
 function getHelp(channelId) {
   const helpMessage = 'How to speak to me:\n\n'
@@ -38,16 +35,6 @@ function getUnknown(channelId) {
   bot.createMessage(channelId, 'Unknown command or command missing. Type `!cbot help` for a list of commands.');
 }
 
-/* function getLatestData(caseData) {
-  if (isEmpty(caseData)) {
-    return { date: 'N/A', number: 0 };
-  }
-  const sortedDates = Object.keys(caseData).sort();
-  const latestDate = sortedDates[sortedDates.length - 1];
-
-  return { date: latestDate, number: caseData[latestDate] };
-} */
-
 async function getCovidData(channelId, query) {
   let queryArray;
 
@@ -66,7 +53,8 @@ async function getCovidData(channelId, query) {
       } = pick(data, ['cases', 'deaths', 'recovered', 'updated']);
       const active = cases - deaths - recovered;
       const dateLastUpdated = moment(updated).format('MMMM D, YYYY [at] h:mm a');
-      const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
+      console.log(`Last updated ${dateLastUpdated}`);
+      const message = 'As of the latest update, the current worldwide COVID-19 numbers are:\n\n'
         + `Total Cases: ${cases.toLocaleString('en')}\n`
         + `Deaths: ${deaths.toLocaleString('en')}\n`
         + `Recovered: ${recovered.toLocaleString('en')}\n`
@@ -92,14 +80,6 @@ async function getCovidData(channelId, query) {
       } else {
         country = v.titleCase(queryArray[0]);
       }
-      /* var cases = (data.cases).toLocaleString('en');
-      var todayCases = (data.todayCases).toLocaleString('en');
-      var deaths = (data.deaths).toLocaleString('en');
-      var todayDeaths = (data.todayDeaths).toLocaleString('en');
-      var recovered = (data.recovered).toLocaleString('en');
-      var active = (data.active).toLocaleString('en');
-      var critical = (data.critical).toLocaleString('en');
-      var casesPer1M = (data.casesPerOneMillion).toLocaleString('en'); */
       const {
         cases, todayCases, deaths, todayDeaths, recovered, active, critical, casesPerOneMillion,
       } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion']);
@@ -127,12 +107,6 @@ async function getCovidData(channelId, query) {
       if (stateData === undefined) {
         throw new Error(queryArray[1]);
       }
-      /* var cases = (stateData.cases).toLocaleString('en');
-      var todayCases = (stateData.todayCases).toLocaleString('en');
-      var deaths = (stateData.deaths).toLocaleString('en');
-      var todayDeaths = (stateData.todayDeaths).toLocaleString('en');
-      var recovered = (stateData.recovered).toLocaleString('en');
-      var active = (stateData.active).toLocaleString('en'); */
       const {
         cases, todayCases, deaths, todayDeaths, recovered, active,
       } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
