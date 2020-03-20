@@ -138,12 +138,12 @@ async function getCovidData(channelId, query) {
       } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
 
       const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
-        + `Total Cases: ${cases}\n`
-        + `Deaths: ${deaths}\n`
-        + `Recovered: ${recovered}\n`
-        + `Active Cases: ${active}\n\n`
-        + `New Cases Today: ${todayCases}\n`
-        + `New Deaths Today: ${todayDeaths}`;
+        + `Total Cases: ${cases.toLocaleString('en')}\n`
+        + `Deaths: ${deaths.toLocaleString('en')}\n`
+        + `Recovered: ${recovered.toLocaleString('en')}\n`
+        + `Active Cases: ${active.toLocaleString('en')}\n\n`
+        + `New Cases Today: ${todayCases.toLocaleString('en')}\n`
+        + `New Deaths Today: ${todayDeaths.toLocaleString('en')}`;
 
       bot.createMessage(channelId, message);
     } catch (stateEntered) {
