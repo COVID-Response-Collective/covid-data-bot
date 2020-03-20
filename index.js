@@ -52,9 +52,8 @@ async function getCovidData(channelId, query) {
         cases, deaths, recovered, updated,
       } = pick(data, ['cases', 'deaths', 'recovered', 'updated']);
       const active = cases - deaths - recovered;
-      const dateLastUpdated = moment(updated).format('MMMM D, YYYY [at] h:mm a');
-      console.log(`Last updated ${dateLastUpdated}`);
-      const message = 'As of the latest update, the current worldwide COVID-19 numbers are:\n\n'
+      const dateLastUpdated = moment(updated).fromNow();
+      const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
         + `Total Cases: ${cases.toLocaleString('en')}\n`
         + `Deaths: ${deaths.toLocaleString('en')}\n`
         + `Recovered: ${recovered.toLocaleString('en')}\n`
