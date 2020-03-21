@@ -71,18 +71,26 @@ async function getCovidData(channelId, query) {
       if (data === 'Country not found') {
         throw new Error(queryArray[0]);
       }
-      let country;
-      if (v.lowerCase(queryArray[0]) === 'us' || v.lowerCase(queryArray[0]) === 'usa') {
-        country = 'the United States';
-      } else if (v.lowerCase(queryArray[0]) === 'uk') {
-        country = 'the United Kingdom';
-      } else {
-        country = v.titleCase(queryArray[0]);
-      }
       const {
-        cases, todayCases, deaths, todayDeaths, recovered, active, critical, casesPerOneMillion,
-      } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion']);
-      const message = `As of the latest update, the current COVID-19 numbers in ${country} are:\n\n`
+        country,
+		cases,
+		todayCases,
+		deaths,
+		todayDeaths,
+		recovered,
+		active,
+		critical,
+		casesPerOneMillion,
+      } = data;
+      let formattedCountry;
+      if (country === 'USA') {
+        formattedCountry = 'the United States';
+      } else if (country === 'UK') {
+        formattedCountry = 'the United Kingdom';
+      } else {
+        formattedCountry = country;
+      }
+      const message = `As of the latest update, the current COVID-19 numbers in ${formattedCountry} are:\n\n`
         + `Total Cases: ${cases.toLocaleString('en')}\n`
         + `Deaths: ${deaths.toLocaleString('en')}\n`
         + `Critical Condition: ${critical.toLocaleString('en')}\n`
@@ -95,7 +103,7 @@ async function getCovidData(channelId, query) {
       bot.createMessage(channelId, message);
     } catch (country) {
       console.log(country);
-      bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${v.titleCase(country)}.`);
+      bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${country}.`);
     }
   } else if (queryArray[0] === 'us' || queryArray[0] === 'usa') {
     const state = v.titleCase(join(queryArray.slice(1, query.length), ' '));
@@ -107,7 +115,12 @@ async function getCovidData(channelId, query) {
         throw new Error(queryArray[1]);
       }
       const {
-        cases, todayCases, deaths, todayDeaths, recovered, active,
+        cases,
+		todayCases,
+		deaths,
+		todayDeaths,
+		recovered,
+		active,
       } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
 
       const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
@@ -121,7 +134,7 @@ async function getCovidData(channelId, query) {
       bot.createMessage(channelId, message);
     } catch (stateEntered) {
       console.log(stateEntered);
-      bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${v.titleCase(state)}.`);
+      bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${state}.`);
     }
   }
 }
