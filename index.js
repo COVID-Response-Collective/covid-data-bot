@@ -3,7 +3,8 @@ import v from 'voca';
 import { join, pick } from 'lodash';
 import moment from 'moment';
 import covid from 'novelcovid';
-import { token } from './config.json';
+import schedule from 'node-schedule';
+import { token, channels } from './config.json';
 import { formatQuery, formatCountry, formatState } from './format';
 
 const COMMAND = {
@@ -97,7 +98,7 @@ async function getCountryData(channelId, query) {
 }
 
 async function getStateData(channelId, query) {
-  const state = formatState(join(query, ' '));
+  const state = v.titleCase(formatState(join(query, ' ')));
   try {
     const data = await covid.getState(state);
     const {
@@ -122,6 +123,49 @@ async function getStateData(channelId, query) {
   }
 }
 
+async function update(channelId) {
+  try {
+    const oregonData = await covid.getState('Oregon');
+    const {
+      orCases,
+      orTodayCases,
+      orDeaths,
+      orTodayDeaths,
+      orRecovered,
+      orActive,
+    } = pick(oregonData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
+    const oregonMessage = 'Oregon:\n\n'
+      + `Total Cases: ${orCases.toLocaleString('en')}\n`
+      + `Deaths: ${orDeaths.toLocaleString('en')}\n`
+      + `Recovered: ${orRecovered.toLocaleString('en')}\n`
+      + `Active Cases: ${orActive.toLocaleString('en')}\n\n`
+      + `New Cases Today: ${orTodayCases.toLocaleString('en')}\n`
+      + `New Deaths Today: ${orTodayDeaths.toLocaleString('en')}\n\n`;
+
+    const washingtonData = await covid.getState('Washington');
+    const {
+      waCases,
+      waTodayCases,
+      waDeaths,
+      waTodayDeaths,
+      waRecovered,
+      waActive,
+    } = pick(washingtonData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
+    const washingtonMessage = 'Washington:\n\n'
+      + `Total Cases: ${waCases.toLocaleString('en')}\n`
+      + `Deaths: ${waDeaths.toLocaleString('en')}\n`
+      + `Recovered: ${waRecovered.toLocaleString('en')}\n`
+      + `Active Cases: ${waActive.toLocaleString('en')}\n\n`
+      + `New Cases Today: ${waTodayCases.toLocaleString('en')}\n`
+      + `New Deaths Today: ${waTodayDeaths.toLocaleString('en')}`;
+
+    const fullMessage = oregonMessage + washingtonMessage;
+    bot.createMessage(channelId, fullMessage);
+  } catch (err) {
+    bot.createMessage(channelId, 'My apologies. I wasn\'t able to get the latest numbers for Oregon and Washington.');
+  }
+}
+
 bot.on('ready', () => { // When the bot is ready
   console.log('Ready!'); // Log "Ready!"
 });
@@ -133,30 +177,44 @@ bot.on('messageCreate', async (msg) => { // When a message is created
     const messageWords = v.words(message).slice(1);
     const [command, scope, ...query] = messageWords;
 
-    switch (command) {
-      case COMMAND.SHOW:
-        // getCovidData(msg.channel.id, query);
-        switch (scope) {
-          case SCOPE.WORLD:
-            getWorldData(msg.channel.id, query);
-            break;
-          case SCOPE.COUNTRY:
-            getCountryData(msg.channel.id, query);
-            break;
-          case SCOPE.STATE:
-            getStateData(msg.channel.id, query);
-            break;
-          default:
-            getUnknown(msg.channel.id);
-        }
-        break;
-      case COMMAND.HELP:
-        getHelp(msg.channel.id);
-        break;
-      default:
-        getUnknown(msg.channel.id);
+    if (channels.allowed.includes(msg.channel.id)) {
+      switch (command) {
+        case COMMAND.SHOW:
+          // getCovidData(msg.channel.id, query);
+          switch (scope) {
+            case SCOPE.WORLD:
+              getWorldData(msg.channel.id, query);
+              break;
+            case SCOPE.COUNTRY:
+              getCountryData(msg.channel.id, query);
+              break;
+            case SCOPE.STATE:
+              getStateData(msg.channel.id, query);
+              break;
+            default:
+              getUnknown(msg.channel.id);
+          }
+          break;
+        case COMMAND.HELP:
+          getHelp(msg.channel.id);
+          break;
+        default:
+          getUnknown(msg.channel.id);
+      }
     }
   }
 });
 
 bot.connect(); // Get the bot to connect to Discord
+
+schedule.scheduleJob('0 3,15 * * *', () => {
+  const updateMessage = 'Hi CRC! COVID-19 Data Bot here.\n'
+    + 'Here\'s your latest update on COVID-19 numbers in the Pacific Northwest.';
+  // bot.createMessage(channels['pnw'], generalMessage);
+  // getStateData(channels['pnw'], ['oregon']);       // Oregon update
+  // getStateData(channels['pnw'], ['washington']);   // Washington update
+  bot.createMessage('688671929712115723', updateMessage);
+  update('688671929712115723'); // Oregon and Washington update
+  // getStateData('688671929712115723', ['Oregon']);       // Oregon update
+  // getStateData('688671929712115723', ['Washington']);   // Washington update
+});
