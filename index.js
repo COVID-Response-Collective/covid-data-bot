@@ -210,11 +210,8 @@ bot.connect(); // Get the bot to connect to Discord
 schedule.scheduleJob('0 3,15 * * *', () => {
   const updateMessage = 'Hi CRC! COVID-19 Data Bot here.\n'
     + 'Here\'s your latest update on COVID-19 numbers in the Pacific Northwest.';
-  // bot.createMessage(channels['pnw'], generalMessage);
-  // getStateData(channels['pnw'], ['oregon']);       // Oregon update
-  // getStateData(channels['pnw'], ['washington']);   // Washington update
-  bot.createMessage('688671929712115723', updateMessage);
-  update('688671929712115723'); // Oregon and Washington update
-  // getStateData('688671929712115723', ['Oregon']);       // Oregon update
-  // getStateData('688671929712115723', ['Washington']);   // Washington update
+  // bot.createMessage(channels['pnw'], updateMessage);
+  // update(channels['pnw']);       // Oregon and update
+  bot.createMessage(channels['test'], updateMessage);
+  update(channels['test']); // test Oregon and Washington update
 });
