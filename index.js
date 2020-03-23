@@ -176,7 +176,6 @@ bot.on('messageCreate', async (msg) => { // When a message is created
   if (v.startsWith(message, '!cbot')) {
     const messageWords = v.words(message).slice(1);
     const [command, scope, ...query] = messageWords;
-
     if (channels.allowed.includes(msg.channel.id)) {
       switch (command) {
         case COMMAND.SHOW:
@@ -210,8 +209,8 @@ bot.connect(); // Get the bot to connect to Discord
 schedule.scheduleJob('0 3,15 * * *', () => {
   const updateMessage = 'Hi CRC! COVID-19 Data Bot here.\n'
     + 'Here\'s your latest update on COVID-19 numbers in the Pacific Northwest.';
-  // bot.createMessage(channels['pnw'], updateMessage);
-  // update(channels['pnw']);       // Oregon and update
-  bot.createMessage(channels['test'], updateMessage);
-  update(channels['test']); // test Oregon and Washington update
+  // bot.createMessage(channels.pnw, updateMessage);
+  // update(channels.pnw);       // Oregon and update
+  bot.createMessage(channels.test, updateMessage);
+  update(channels.test); // test Oregon and Washington update
 });
