@@ -106,9 +106,9 @@ async function getStateData(channelId, query) {
       todayCases,
       deaths,
       todayDeaths,
-      recovered,
       active,
-    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
+    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'active']);
+    const recovered = cases - deaths - active;
     const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
       + `Total Cases: ${cases.toLocaleString('en')}\n`
       + `Deaths: ${deaths.toLocaleString('en')}\n`
@@ -116,7 +116,7 @@ async function getStateData(channelId, query) {
       + `Active Cases: ${active.toLocaleString('en')}\n\n`
       + `New Cases Today: ${todayCases.toLocaleString('en')}\n`
       + `New Deaths Today: ${todayDeaths.toLocaleString('en')}`;
-
+    
     bot.createMessage(channelId, message);
   } catch (err) {
     bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${state}.`);
@@ -125,39 +125,25 @@ async function getStateData(channelId, query) {
 
 async function update(channelId) {
   try {
-    const oregonData = await covid.getState('Oregon');
-    const {
-      orCases,
-      orTodayCases,
-      orDeaths,
-      orTodayDeaths,
-      orRecovered,
-      orActive,
-    } = pick(oregonData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
-    const oregonMessage = 'Oregon:\n\n'
-      + `Total Cases: ${orCases.toLocaleString('en')}\n`
-      + `Deaths: ${orDeaths.toLocaleString('en')}\n`
-      + `Recovered: ${orRecovered.toLocaleString('en')}\n`
-      + `Active Cases: ${orActive.toLocaleString('en')}\n\n`
-      + `New Cases Today: ${orTodayCases.toLocaleString('en')}\n`
-      + `New Deaths Today: ${orTodayDeaths.toLocaleString('en')}\n\n`;
+    let or = await covid.getState('Oregon');
+    or.recovered = or.cases - or.deaths - or.active;
+    const oregonMessage = `Oregon:\n\n`
+      + `Total Cases: ${or.cases.toLocaleString('en')}\n`
+      + `Deaths: ${or.deaths.toLocaleString('en')}\n`
+      + `Recovered: ${or.recovered.toLocaleString('en')}\n`
+      + `Active Cases: ${or.active.toLocaleString('en')}\n\n`
+      + `New Cases Today: ${or.todayCases.toLocaleString('en')}\n`
+      + `New Deaths Today: ${or.todayDeaths.toLocaleString('en')}\n\n`;
 
-    const washingtonData = await covid.getState('Washington');
-    const {
-      waCases,
-      waTodayCases,
-      waDeaths,
-      waTodayDeaths,
-      waRecovered,
-      waActive,
-    } = pick(washingtonData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active']);
-    const washingtonMessage = 'Washington:\n\n'
-      + `Total Cases: ${waCases.toLocaleString('en')}\n`
-      + `Deaths: ${waDeaths.toLocaleString('en')}\n`
-      + `Recovered: ${waRecovered.toLocaleString('en')}\n`
-      + `Active Cases: ${waActive.toLocaleString('en')}\n\n`
-      + `New Cases Today: ${waTodayCases.toLocaleString('en')}\n`
-      + `New Deaths Today: ${waTodayDeaths.toLocaleString('en')}`;
+    let wa = await covid.getState('Washington');
+    wa.recovered = wa.cases - wa.deaths - wa.active; 
+    const washingtonMessage = `Washington:\n\n`
+      + `Total Cases: ${wa.cases.toLocaleString('en')}\n`
+      + `Deaths: ${wa.deaths.toLocaleString('en')}\n`
+      + `Recovered: ${wa.recovered.toLocaleString('en')}\n`
+      + `Active Cases: ${wa.active.toLocaleString('en')}\n\n`
+      + `New Cases Today: ${wa.todayCases.toLocaleString('en')}\n`
+      + `New Deaths Today: ${wa.todayDeaths.toLocaleString('en')}`;
 
     const fullMessage = oregonMessage + washingtonMessage;
     bot.createMessage(channelId, fullMessage);
@@ -179,7 +165,6 @@ bot.on('messageCreate', async (msg) => { // When a message is created
     if (channels.allowed.includes(msg.channel.id)) {
       switch (command) {
         case COMMAND.SHOW:
-          // getCovidData(msg.channel.id, query);
           switch (scope) {
             case SCOPE.WORLD:
               getWorldData(msg.channel.id, query);

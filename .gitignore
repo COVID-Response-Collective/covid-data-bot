@@ -1,4 +1,5 @@
 config.json
+build_docker.sh
 
 # Logs
 logs
