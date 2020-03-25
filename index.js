@@ -194,8 +194,8 @@ bot.connect(); // Get the bot to connect to Discord
 schedule.scheduleJob('0 15 * * *', () => {
   const updateMessage = 'This is the CRC COVID-19 Data Bot.\n'
     + `Here are the latest COVID-19 numbers in the Pacific Northwest this morning (${moment().format('D/MM/YYYY')}).`;
-  //bot.createMessage(channels.pnw, updateMessage);
-  //update(channels.pnw);       // Oregon and Washington update
+  // bot.createMessage(channels.pnw, updateMessage);
+  // update(channels.pnw);       // Oregon and Washington update
   bot.createMessage(channels.test, updateMessage);
   update(channels.test); // test Oregon and Washington update
 });
@@ -203,8 +203,8 @@ schedule.scheduleJob('0 15 * * *', () => {
 schedule.scheduleJob('0 23 * * *', () => {
   const updateMessage = 'This is the CRC COVID-19 Data Bot.\n'
     + `Here are the latest COVID-19 numbers in the Pacific Northwest this afternoon (${moment().format('D/MM/YYYY')}).`;
-  //bot.createMessage(channels.pnw, updateMessage);
-  //update(channels.pnw);       // Oregon and Washington update
+  // bot.createMessage(channels.pnw, updateMessage);
+  // update(channels.pnw);       // Oregon and Washington update
   bot.createMessage(channels.test, updateMessage);
   update(channels.test); // test Oregon and Washington update
 });
