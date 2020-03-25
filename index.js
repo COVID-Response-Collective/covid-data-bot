@@ -116,7 +116,7 @@ async function getStateData(channelId, query) {
       + `Active Cases: ${active.toLocaleString('en')}\n\n`
       + `New Cases Today: ${todayCases.toLocaleString('en')}\n`
       + `New Deaths Today: ${todayDeaths.toLocaleString('en')}`;
-    
+
     bot.createMessage(channelId, message);
   } catch (err) {
     bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${state}.`);
@@ -125,9 +125,9 @@ async function getStateData(channelId, query) {
 
 async function update(channelId) {
   try {
-    let or = await covid.getState('Oregon');
+    const or = await covid.getState('Oregon');
     or.recovered = or.cases - or.deaths - or.active;
-    const oregonMessage = `Oregon:\n\n`
+    const oregonMessage = 'Oregon:\n\n'
       + `Total Cases: ${or.cases.toLocaleString('en')}\n`
       + `Deaths: ${or.deaths.toLocaleString('en')}\n`
       + `Recovered: ${or.recovered.toLocaleString('en')}\n`
@@ -135,9 +135,9 @@ async function update(channelId) {
       + `New Cases Today: ${or.todayCases.toLocaleString('en')}\n`
       + `New Deaths Today: ${or.todayDeaths.toLocaleString('en')}\n\n`;
 
-    let wa = await covid.getState('Washington');
-    wa.recovered = wa.cases - wa.deaths - wa.active; 
-    const washingtonMessage = `Washington:\n\n`
+    const wa = await covid.getState('Washington');
+    wa.recovered = wa.cases - wa.deaths - wa.active;
+    const washingtonMessage = 'Washington:\n\n'
       + `Total Cases: ${wa.cases.toLocaleString('en')}\n`
       + `Deaths: ${wa.deaths.toLocaleString('en')}\n`
       + `Recovered: ${wa.recovered.toLocaleString('en')}\n`
@@ -191,11 +191,20 @@ bot.on('messageCreate', async (msg) => { // When a message is created
 
 bot.connect(); // Get the bot to connect to Discord
 
-schedule.scheduleJob('0 3,15 * * *', () => {
-  const updateMessage = 'Hi CRC! COVID-19 Data Bot here.\n'
-    + 'Here\'s your latest update on COVID-19 numbers in the Pacific Northwest.';
-  // bot.createMessage(channels.pnw, updateMessage);
-  // update(channels.pnw);       // Oregon and update
+schedule.scheduleJob('0 15 * * *', () => {
+  const updateMessage = 'This is the CRC COVID-19 Data Bot.\n'
+    + `Here are the latest COVID-19 numbers in the Pacific Northwest this morning (${moment().format('D/MM/YYYY')}).`;
+  //bot.createMessage(channels.pnw, updateMessage);
+  //update(channels.pnw);       // Oregon and Washington update
+  bot.createMessage(channels.test, updateMessage);
+  update(channels.test); // test Oregon and Washington update
+});
+
+schedule.scheduleJob('0 23 * * *', () => {
+  const updateMessage = 'This is the CRC COVID-19 Data Bot.\n'
+    + `Here are the latest COVID-19 numbers in the Pacific Northwest this afternoon (${moment().format('D/MM/YYYY')}).`;
+  //bot.createMessage(channels.pnw, updateMessage);
+  //update(channels.pnw);       // Oregon and Washington update
   bot.createMessage(channels.test, updateMessage);
   update(channels.test); // test Oregon and Washington update
 });

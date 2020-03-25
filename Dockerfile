@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 # Copy the file from your host to your current location
 COPY package.json .
 
-# Inform Docker that the container is listening on the specified port at runtime.
+# Inform Docker of the port being exposed.
 EXPOSE 8080
 
 # Run the command inside your image filesystem
