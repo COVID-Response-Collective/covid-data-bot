@@ -1,5 +1,6 @@
 {
   "name": "covid-data-bot",
+  "repository": "https://github.com/COVID-Response-Collective/covid-data-bot",
   "version": "0.0.1",
   "description": "Discord bot that speaks out COVID-19 data provided by Johns Hopkins University.",
   "main": "index.js",
@@ -8,7 +9,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "pretest": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix"
   },
-  "author": "Omeed Habibelahian",
+  "author": "Meredith Mello",
+  "contributors": [
+    "Omeed Habibelahian"
+  ],
   "license": "MIT",
   "dependencies": {
     "axios": "^0.19.2",
