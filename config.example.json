@@ -1,0 +1,13 @@
+{
+  "token": "botID12345 [copy bot ID from Discord developer app portal]",
+  "channels": {
+    "example_channel1": "12345 [copy channel ID from Discord]",
+    "example_channel2": "23456 [copy channel ID from Discord]",
+    "allowed": [
+      "12345",
+      "23345",
+      "23456"
+    ],
+    "test": "23345 [copy channel ID from Discord]"
+  }
+}
