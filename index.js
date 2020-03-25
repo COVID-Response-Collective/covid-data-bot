@@ -18,33 +18,35 @@ const SCOPE = {
   STATE: 'state',
 };
 
+const BOT_NAME = 'cbot';
+
 const bot = new Eris(token);
 
 function getHelp(channelId) {
   const helpMessage = 'How to speak to me:\n\n'
-                    + '`!cbot {command} {your query}`\n\n'
-                    + 'Commands:\n\n'
-                    + '1. `!cbot show world`\n'
-                    + '     Gets latest case numbers worldwide.\n\n'
-                    + '2. `!cbot show country [country name]`\n'
-                    + '     Gets latest case numbers for the specified country.\n\n'
-                    + '     Example:\n'
-                    + '     `!cbot show country us`\n\n'
-                    + '3. `!cbot show state [state name]`\n'
-                    + '     Gets latest case numbers for the specified US state.\n\n'
-                    + '     Example:\n'
-                    + '     `!cbot show state oregon`\n'
-                    + '     OR\n'
-                    + '     `!cbot show state or`\n\n'
-                    + '3. `!cbot help`\n'
-                    + '     Prints this help message.\n\n'
-                    + 'Stay healthy! This bot loves you very much.';
+    + `\`!${BOT_NAME} {command} {your query}\`\n\n`
+    + 'Commands:\n\n'
+    + `1. \`!${BOT_NAME} show world\`\n`
+    + '     Gets latest case numbers worldwide.\n\n'
+    + `2. \`!${BOT_NAME} show country [country name]\`\n`
+    + '     Gets latest case numbers for the specified country.\n\n'
+    + '     Example:\n'
+    + `     \`!${BOT_NAME} show country us\`\n\n`
+    + `3. \`!${BOT_NAME} show state [state name]\`\n`
+    + '     Gets latest case numbers for the specified US state.\n\n'
+    + '     Example:\n'
+    + `     \`!${BOT_NAME} show state oregon\`\n`
+    + '     OR\n'
+    + `     \`!${BOT_NAME} show state or\`\n\n`
+    + `3. \`!${BOT_NAME} help\`\n`
+    + '     Prints this help message.\n\n'
+    + 'Stay healthy! This bot loves you very much.';
 
   bot.createMessage(channelId, helpMessage);
 }
 
 function getUnknown(channelId) {
-  bot.createMessage(channelId, 'Unknown command or command missing. Type `!cbot help` for a list of commands.');
+  bot.createMessage(channelId, `Unknown command or command missing. Type \`!${BOT_NAME} help\` for a list of commands.`);
 }
 
 async function getWorldData(channelId) {
@@ -159,7 +161,7 @@ bot.on('ready', () => { // When the bot is ready
 bot.on('messageCreate', async (msg) => { // When a message is created
   const message = v.lowerCase(msg.content);
 
-  if (v.startsWith(message, '!cbot')) {
+  if (v.startsWith(message, `!${BOT_NAME}`)) {
     const messageWords = v.words(message).slice(1);
     const [command, scope, ...query] = messageWords;
     if (channels.allowed.includes(msg.channel.id)) {
