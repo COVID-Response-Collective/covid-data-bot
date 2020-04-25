@@ -1,3 +1,4 @@
+// import fs from 'fs';
 import Eris from 'eris';
 import v from 'voca';
 import { join, pick } from 'lodash';
@@ -52,16 +53,30 @@ function getUnknown(channelId) {
 
 async function getWorldData(channelId) {
   try {
+    const data = await track.all();
     const {
-      cases, deaths, recovered, updated,
-    } = await track.all();
-    const active = cases - deaths - recovered;
+      cases,
+      todayCases,
+      deaths,
+      todayDeaths,
+      recovered,
+      active,
+      critical,
+      casesPerOneMillion,
+      deathsPerOneMillion,
+      updated,
+    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion', 'deathsPerOneMillion', 'updated']);
     const dateLastUpdated = moment(updated).fromNow();
     const message = `As of ${dateLastUpdated}, the current worldwide COVID-19 numbers are:\n\n`
       + `Total Cases: ${cases.toLocaleString('en')}\n`
       + `Deaths: ${deaths.toLocaleString('en')}\n`
       + `Recovered: ${recovered.toLocaleString('en')}\n`
-      + `Active Cases: ${active.toLocaleString('en')}`;
+      + `In Critical Condition: ${critical.toLocaleString('en')}\n`
+      + `Active Cases: ${active.toLocaleString('en')}\n\n`
+      + `New Cases Today: ${todayCases.toLocaleString('en')}\n`
+      + `New Deaths Today: ${todayDeaths.toLocaleString('en')}\n\n`
+      + `Cases Per Million: ${casesPerOneMillion.toLocaleString('en')}\n`
+      + `Deaths Per Million: ${deathsPerOneMillion.toLocaleString('en')}`;
 
     bot.createMessage(channelId, message);
   } catch (error) {
@@ -83,20 +98,25 @@ async function getCountryData(channelId, query) {
       active,
       critical,
       casesPerOneMillion,
-    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion']);
+      deathsPerOneMillion,
+      updated,
+    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion', 'deathsPerOneMillion', 'updated']);
     const formattedCountry = formatCountry(country);
-    const message = `As of the latest update, the current COVID-19 numbers in ${formattedCountry} are:\n\n`
+    const dateLastUpdated = moment(updated).fromNow();
+    const message = `As of ${dateLastUpdated}, the current COVID-19 numbers in ${formattedCountry} are:\n\n`
       + `Total Cases: ${cases.toLocaleString('en')}\n`
       + `Deaths: ${deaths.toLocaleString('en')}\n`
-      + `Critical Condition: ${critical.toLocaleString('en')}\n`
       + `Recovered: ${recovered.toLocaleString('en')}\n`
-      + `Active Cases: ${active.toLocaleString('en')}\n`
-      + `Cases Per Million: ${casesPerOneMillion.toLocaleString('en')}\n\n`
+      + `In Critical Condition: ${critical.toLocaleString('en')}\n`
+      + `Active Cases: ${active.toLocaleString('en')}\n\n`
+      + `Cases Per Million: ${casesPerOneMillion.toLocaleString('en')}\n`
+      + `Deaths Per Million: ${deathsPerOneMillion.toLocaleString('en')}\n\n`
       + `New Cases Reported So Far Today: ${todayCases.toLocaleString('en')}\n`
       + `New Deaths Reported So Far Today: ${todayDeaths.toLocaleString('en')}`;
 
     bot.createMessage(channelId, message);
   } catch (error) {
+    console.log(error);
     bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${country}.`);
   }
 }
@@ -104,15 +124,15 @@ async function getCountryData(channelId, query) {
 async function getStateData(channelId, query) {
   const state = v.titleCase(formatState(join(query, ' ')));
   try {
-    const allStates = await track.states();
-    const data = allStates.find((e) => e.state === state);
+    const data = await track.states();
+    const stateData = data.find((e) => e.state === state);
     const {
       cases,
       todayCases,
       deaths,
       todayDeaths,
       active,
-    } = pick(data, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'active']);
+    } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'active']);
     const recovered = cases - deaths - active;
     const message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
       + `Total Cases: ${cases.toLocaleString('en')}\n`
@@ -123,8 +143,8 @@ async function getStateData(channelId, query) {
       + `New Deaths Reported So Far Today: ${todayDeaths.toLocaleString('en')}`;
 
     bot.createMessage(channelId, message);
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    console.log(error);
     bot.createMessage(channelId, `My apologies. I wasn't able to get the numbers for ${state}.`);
   }
 }
@@ -154,10 +174,10 @@ async function getStateData(channelId, query) {
     washingtonMessage += `Recovered: ${wa.recovered.toLocaleString('en')}\n`;
     washingtonMessage += `Active Cases: ${wa.active.toLocaleString('en')}`;
 
-    const fullMessage = oregonMessage + washingtonMessage;
+    const fullMessage = `${oregonMessage}---------\n\n${washingtonMessage}`;
     bot.createMessage(channelId, fullMessage);
-    bot.createMessage(channelId, oregonMessage);
   } catch (err) {
+    console.log(err);
     bot.createMessage(channelId, 'My apologies. I wasn\'t able to get the latest numbers for Oregon and Washington.');
   }
 } */

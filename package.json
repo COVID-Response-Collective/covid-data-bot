@@ -1,8 +1,8 @@
 {
   "name": "covid-data-bot",
   "repository": "https://github.com/COVID-Response-Collective/covid-data-bot",
-  "version": "0.0.1",
-  "description": "Discord bot that speaks out COVID-19 data provided by Johns Hopkins University.",
+  "version": "1.0.0",
+  "description": "Discord bot that speaks out COVID-19 data provided by Worldometers.",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --exec babel-node index.js",
@@ -20,7 +20,7 @@
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "node-schedule": "^1.3.2",
-    "novelcovid": "^1.2.6",
+    "novelcovid": "^1.2.7",
     "voca": "^1.4.0"
   },
   "devDependencies": {
