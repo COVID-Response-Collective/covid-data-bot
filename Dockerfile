@@ -11,10 +11,10 @@ COPY package.json .
 EXPOSE 8080
 
 # Run the command inside your image filesystem
-RUN npm install
+RUN yarn install
 
 # Run the specified command within the container.
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
 
 # Copy the rest of your app's source code frmo your host to your image filesystem.
 COPY . .

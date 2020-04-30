@@ -109,7 +109,7 @@ async function getCountryData(channelId, query, yesterday) {
     } = pick(countryData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion', 'deathsPerOneMillion', 'updated']);
     const formattedCountry = formatCountry(country);
     const dateLastUpdated = moment(updated).fromNow();
-    let message = `As of ${dateLastUpdated}, the current COVID-19 numbers in ${formattedCountry} are:\n\n`
+    let message = `As of ${dateLastUpdated}, the current COVID-19 numbers in ${formattedCountry} are:\n\n`;
     if (yesterday) {
       message = `As of yesterday, the COVID-19 numbers in ${formattedCountry} were:\n\n`;
     }
@@ -132,7 +132,7 @@ async function getCountryData(channelId, query, yesterday) {
   }
 }
 
-async function getStateData(channelId, query, yesterday=false) {
+async function getStateData(channelId, query, yesterday = false) {
   const state = v.titleCase(formatState(join(query, ' ')));
   try {
     const data = await track.states(null, { yesterday });
@@ -145,10 +145,7 @@ async function getStateData(channelId, query, yesterday=false) {
       active,
     } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'active']);
     let recovered = cases - deaths - active;
-    if (state === 'Oregon' && recovered === 0) {
-      recovered = 'N/A';
-    }
-    let message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`
+    let message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`;
     if (yesterday) {
       message = `As of yesterday, the COVID-19 numbers in ${state} are:\n\n`;
     }
@@ -171,12 +168,9 @@ async function getStateData(channelId, query, yesterday=false) {
 async function update(channelId) {
   try {
     const allStates = await track.states(null, { yesterday: true });
-    let or = allStates.find(e => e.state === 'Oregon');
+    const or = allStates.find((e) => e.state === 'Oregon');
     or.recovered = or.cases - or.deaths - or.active;
-    if (or.recovered === 0) {
-      or.recovered = 'N/A';
-    }
-    let oregonMessage = 'Oregon:\n\n'
+    const oregonMessage = 'Oregon:\n\n'
                   + `Total Cases: ${or.cases.toLocaleString('en')}\n`
                   + `Deaths: ${or.deaths.toLocaleString('en')}\n`
                   + `Recovered: ${or.recovered}\n`
@@ -184,9 +178,9 @@ async function update(channelId) {
                   + `New Cases Reported So Far Today: ${or.todayCases.toLocaleString('en')}\n`
                   + `New Deaths Reported So Far Today: ${or.todayDeaths.toLocaleString('en')}\n\n`;
 
-    let wa = allStates.find(e => e.state === 'Washington');
+    const wa = allStates.find((e) => e.state === 'Washington');
     wa.recovered = wa.cases - wa.deaths - wa.active;
-    let washingtonMessage = 'Washington:\n\n'
+    const washingtonMessage = 'Washington:\n\n'
                   + `Total Cases: ${wa.cases.toLocaleString('en')}\n`
                   + `Deaths: ${wa.deaths.toLocaleString('en')}\n`
                   + `Recovered: ${wa.recovered.toLocaleString('en')}\n`
@@ -209,7 +203,7 @@ bot.on('messageCreate', async (msg) => { // When a message is created
   const message = v.lowerCase(msg.content);
 
   if (v.startsWith(message, `!${BOT_NAME}`)) {
-    let messageWords = v.words(message).slice(1);
+    const messageWords = v.words(message).slice(1);
     let yesterday = false;
     if (v.lowerCase(messageWords.slice(-1)[0]) === 'yesterday') {
       yesterday = true;
@@ -246,18 +240,10 @@ bot.on('messageCreate', async (msg) => { // When a message is created
 bot.connect(); // Get the bot to connect to Discord
 
 schedule.scheduleJob('0 2 * * *', () => {
-  const updateMessage = `Here are the latest COVID-19 numbers in Oregon this evening (${moment().format('M/DD/YYYY')}) as of 7pm PT.\n`
+  const updateMessage = `Here are the latest COVID-19 numbers in the Pacific Northwest this evening (${moment().format('M/DD/YYYY')}) as of 7pm PT.\n`
                       + 'Source: Worldometers\n'
                       + 'DISCLAIMER: It\'s possible that some cases will be reported after this update.\n\n'
                       + '----------------\n\n';
-  // bot.createMessage(channels.pnw, updateMessage);
-  // getStateData(channels.pnw, ['Oregon'], true); // Oregon update
-  // bot.createMessage(channels.pnw, '----------------');
-  // getStateData(channels.pnw, ['Washington'], true); // Washington update
   bot.createMessage(channels.pnw, updateMessage);
   update(channels.pnw);
-  // bot.createMessage(channels.test, updateMessage);
-  // getStateData(channels.test, ['Oregon'], true); // Oregon update
-  // bot.createMessage(channels.test, '----------------');
-  // getStateData(channels.test, ['Washington'], true); // Washington update
 });
