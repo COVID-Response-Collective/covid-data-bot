@@ -152,12 +152,13 @@ async function getStateData(channel, query, yesterday = false) {
     if (yesterday) {
       message = `As of yesterday, the COVID-19 numbers in ${state} are:\n\n`;
     }
-    message += `Total Cases: ${numeral(cases).format('0,0')}\n`
+    message += `Total Cases: ${numeral(cases).format('0,0')}${state === 'Oregon' ? '*' : ''}\n`
       + `Deaths: ${numeral(deaths).format('0,0')}\n`
       + `Recovered: ${numeral(recovered).format('0,0')}\n`
-      + `Active Cases: ${numeral(active).format('0,0')}\n\n`
-      + `New Cases Reported ${yesterday ? 'Yesterday' : 'So Far Today'}: ${numeral(todayCases).format('0,0')}\n`
-      + `New Deaths Reported ${yesterday ? 'Yesterday' : 'So Far Today'}: ${numeral(todayDeaths).format('0,0')}\n\n`
+      + `Active Cases: ${numeral(active).format('0,0')}${state === 'Oregon' ? '*' : ''}\n\n`
+      + `New Cases Reported ${yesterday ? 'Yesterday' : 'So Far Today'}: ${numeral(todayCases).format('0,0')}${state === 'Oregon' ? '*' : ''}\n`
+      + `New Deaths Reported ${yesterday ? 'Yesterday' : 'So Far Today'}: ${numeral(todayDeaths).format('0,0')}${state === 'Oregon' ? '*' : ''}\n\n`
+      + `${state === 'Oregon' ? '* As of May 5, 2020, Oregon discloses both confirmed and presumptive cases.\n\n' : ''}`
       + 'NOTE: Worldometers tends to reset their daily counts at around 5-5:30pm PT, '
       + 'so if it is currently later in the day and the daily count is at 0 or otherwise curiously low, you may need to add \'yesterday\' to the end of your message to see today\'s counts. This also means yesterday\'s numbers will not be viewable after this point, as Worldometers has already reset their daily clock.';
 
@@ -202,7 +203,7 @@ client.on('ready', () => { // When the bot is ready
   console.log('Ready!'); // Log "Ready!"
 });
 
-client.on('message', msg => { // When a message is created
+client.on('message', (msg) => { // When a message is created
   const message = v.lowerCase(msg.content);
 
   if (v.startsWith(message, `!${BOT_NAME}`)) {
@@ -243,12 +244,12 @@ client.on('message', msg => { // When a message is created
 client.login(token); // Get the bot to connect to Discord
 
 schedule.scheduleJob('0 2 * * *', () => {
-  const updateMessage = `Here are the latest COVID-19 numbers in the Pacific Northwest this evening (${moment().format('M/DD/YYYY')}) as of 7pm PT.\n`
+  const updateMessage = `Here are the latest COVID-19 numbers in the Pacific Northwest this evening (${moment().utcOffset("-07:00").format('M/DD/YYYY')}) as of 7pm PT.\n`
                       + 'Source: Worldometers\n'
-                      + 'DISCLAIMER: It\'s possible that some cases will be reported after this update.\n\n'
+                      + 'DISCLAIMER: It\'s possible that some cases will be reported after this update. Also, as of May 5, 2020, Oregon discloses both confirmed and presumptive cases.\n\n'
                       + '----------------\n\n';
   client.channels.fetch(channels.pnw)
-    .then(channel => {
+    .then((channel) => {
       channel.send(updateMessage);
       update(channel);
     })
