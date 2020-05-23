@@ -1,10 +1,8 @@
-// import fs from 'fs';
-// import Eris from 'eris';
 import Discord from 'discord.js';
 import v from 'voca';
 import { join, pick } from 'lodash';
 import moment from 'moment';
-import { NovelCovid } from 'novelcovid';
+import api from 'novelcovid';
 import schedule from 'node-schedule';
 import numeral from 'numeral';
 import { token, channels } from './config.json';
@@ -23,9 +21,7 @@ const SCOPE = {
 
 const BOT_NAME = 'cbot';
 
-// const bot = new Eris(token);
 const client = new Discord.Client();
-const track = new NovelCovid();
 
 function getHelp(channel) {
   const helpMessage = 'How to speak to me:\n\n'
@@ -54,9 +50,9 @@ function getUnknown(channel) {
   channel.send(`Unknown command or command missing. Type \`!${BOT_NAME} help\` for a list of commands.`);
 }
 
-async function getWorldData(channel, yesterday) {
+async function getWorldData(channel, yesterday = false) {
   try {
-    const data = await track.all({ yesterday });
+    const data = yesterday ? await api.yesterday.all() : await api.all();
     const {
       cases,
       todayCases,
@@ -93,11 +89,11 @@ async function getWorldData(channel, yesterday) {
   }
 }
 
-async function getCountryData(channel, query, yesterday) {
+async function getCountryData(channel, query, yesterday = false) {
   const country = formatQuery(join(query, ' '));
   try {
-    const data = await track.countries(null, { yesterday });
-    const countryData = data.find((e) => e.country === country);
+    /* eslint-disable-next-line */
+    const countryData = yesterday ? await api.yesterday.countries({ country }) : await api.countries({ country });
     const {
       cases,
       todayCases,
@@ -136,10 +132,10 @@ async function getCountryData(channel, query, yesterday) {
 }
 
 async function getStateData(channel, query, yesterday = false) {
-  const state = v.titleCase(formatState(join(query, ' ')));
+  const state = formatState(join(query, ' '));
   try {
-    const data = await track.states(null, { yesterday });
-    const stateData = data.find((e) => e.state === state);
+    /* eslint-disable-next-line */
+    const stateData = yesterday ? await api.yesterday.states({ state }) : await api.states({ state });
     const {
       cases,
       todayCases,
@@ -148,7 +144,7 @@ async function getStateData(channel, query, yesterday = false) {
       active,
     } = pick(stateData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'active']);
     const recovered = cases - deaths - active;
-    let message = `As of the latest update, the current COVID-19 numbers in ${state} are:\n\n`;
+    let message = `As of the latest update, the current COVID-19 numbers in ${v.titleCase(state)} are:\n\n`;
     if (yesterday) {
       message = `As of yesterday, the COVID-19 numbers in ${state} are:\n\n`;
     }
@@ -169,10 +165,10 @@ async function getStateData(channel, query, yesterday = false) {
   }
 }
 
-async function update(channel) {
+async function pnwUpdate(channel) {
   try {
-    const allStates = await track.states(null, { yesterday: true });
-    const or = allStates.find((e) => e.state === 'Oregon');
+    const pnwData = await api.yesterday.states({ state: ['oregon', 'washington'] });
+    const or = pnwData.find((e) => e.state === 'Oregon');
     or.recovered = or.cases - or.deaths - or.active;
     const oregonMessage = 'Oregon:\n\n'
                   + `Total Cases: ${numeral(or.cases).format('0,0')}*\n`
@@ -183,7 +179,7 @@ async function update(channel) {
                   + `New Deaths Reported So Far Today: ${numeral(or.todayDeaths).format('0,0')}\n\n`
                   + '* Since May 5, 2020, Oregon discloses both confirmed and presumptive cases.\n\n';
 
-    const wa = allStates.find((e) => e.state === 'Washington');
+    const wa = pnwData.find((e) => e.state === 'Washington');
     wa.recovered = wa.cases - wa.deaths - wa.active;
     const washingtonMessage = 'Washington:\n\n'
                   + `Total Cases: ${numeral(wa.cases).format('0,0')}\n`
@@ -197,6 +193,36 @@ async function update(channel) {
   } catch (error) {
     console.log(error);
     channel.send('My apologies. I wasn\'t able to get today\'s update for Oregon and Washington.');
+  }
+}
+
+async function nationalUpdate(channel) {
+  try {
+    const countryData = await api.yesterday.countries({ country: 'USA' });
+    const {
+      cases,
+      todayCases,
+      deaths,
+      todayDeaths,
+      recovered,
+      active,
+      critical,
+      casesPerOneMillion,
+      deathsPerOneMillion,
+    } = pick(countryData, ['cases', 'todayCases', 'deaths', 'todayDeaths', 'recovered', 'active', 'critical', 'casesPerOneMillion', 'deathsPerOneMillion']);
+    const message = `Total Cases: ${numeral(cases).format('0,0')}\n`
+      + `Deaths: ${numeral(deaths).format('0,0')}\n`
+      + `Recovered: ${numeral(recovered).format('0,0')}\n`
+      + `In Critical Condition: ${numeral(critical).format('0,0')}\n`
+      + `Active Cases: ${numeral(active).format('0,0')}\n\n`
+      + `Cases Per Million: ${numeral(casesPerOneMillion).format('0,0')}\n`
+      + `Deaths Per Million: ${numeral(deathsPerOneMillion).format('0,0')}\n\n`
+      + `New Cases Reported So Far Today: ${numeral(todayCases).format('0,0')}\n`
+      + `New Deaths Reported So Far Today: ${numeral(todayDeaths).format('0,0')}\n`;
+    channel.send(message);
+  } catch (error) {
+    console.log(error);
+    channel.send('My apologies. I wasn\'t able to get the numbers for the United States.');
   }
 }
 
@@ -245,14 +271,25 @@ client.on('message', (msg) => { // When a message is created
 client.login(token); // Get the bot to connect to Discord
 
 schedule.scheduleJob('0 2 * * *', () => {
-  const updateMessage = `Here are the latest COVID-19 numbers in the Pacific Northwest this evening (${moment().utcOffset('-07:00').format('M/DD/YYYY')}) as of 7pm PT.\n`
-                      + 'Source: Worldometers\n'
+  const pnwUpdateMessage = `Here are the latest COVID-19 numbers in the Pacific Northwest this evening (${moment().utcOffset('-07:00').format('M/DD/YYYY')}) as of 7pm PT.\n`
+                      + 'Source: Worldometer\n'
                       + 'DISCLAIMER: It\'s possible that some cases will be reported after this update.\n\n'
                       + '----------------\n\n';
   client.channels.fetch(channels.pnw)
     .then((channel) => {
-      channel.send(updateMessage);
-      update(channel);
+      channel.send(pnwUpdateMessage);
+      pnwUpdate(channel);
+    })
+    .catch(console.error);
+
+  const nationalUpdateMessage = `Here are the latest COVID-19 numbers in the United States this evening (${moment().utcOffset('-07:00').format('M/DD/YYYY')}) as of 7pm PT.\n`
+                      + 'Source: Worldometer\n'
+                      + 'DISCLAIMER: It\'s possible that some cases will be reported after this update.\n\n'
+                      + '----------------\n\n';
+  client.channels.fetch(channels.national)
+    .then((channel) => {
+      channel.send(nationalUpdateMessage);
+      nationalUpdate(channel);
     })
     .catch(console.error);
 });

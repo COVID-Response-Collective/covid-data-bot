@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@aero/centra@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@aero/centra/-/centra-1.0.3.tgz#e16e47f6e54bb297fa0222fc41f775ec7b382625"
+  integrity sha512-Ljd3utKoMcXiMSLr4uxMD9EAFeqw2nOEGfvMXVRKX4sT1OlYuUVQEz1Xrfi5z0RNrGXjm50lJq1jLlRW4FYcEA==
+
 "@babel/cli@^7.8.4":
   version "7.8.4"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.8.4.tgz#505fb053721a98777b2b175323ea4f090b7d3c1c"
@@ -2977,7 +2982,7 @@ node-environment-flags@^1.0.5:
     object.getownpropertydescriptors "^2.0.3"
     semver "^5.7.0"
 
-node-fetch@*, node-fetch@^2.6.0:
+node-fetch@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
@@ -3051,12 +3056,12 @@ normalize-url@^4.1.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
   integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
 
-novelcovid@^1.2.7:
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/novelcovid/-/novelcovid-1.2.7.tgz#dc8e00f1697285562fd0cb5eb52ad80bbbaa194a"
-  integrity sha512-Kfu4pzlBNpLSU+W4tC5oO5fEYB8k//TAK0FZUL/d/YvaEziMgfTlJkgipV5Nr60CwBZbixzyJp/H+gvx1BAyZg==
+novelcovid@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/novelcovid/-/novelcovid-2.1.1.tgz#71f1a5f70de63fbe98189f1604dc4702b2d43fb7"
+  integrity sha512-9gnKH26EG12niC3kFy0kBTYhKYE6UeWr35DY2gVnN2IbE02WpFKTdsrVJbirxo7RoUX2eTImbMmv2e+VpE7sOw==
   dependencies:
-    node-fetch "*"
+    "@aero/centra" "1.0.3"
 
 npm-run-path@^4.0.0:
   version "4.0.1"
